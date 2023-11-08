@@ -1,0 +1,31 @@
+
+.header-content {
+    display: flex;
+    align-items: center;
+    
+}
+
+.navigation {
+    display: flex;
+    align-items:center;
+    list-style: none;
+    column-gap: 48px;
+    list-style: none;
+    margin-right: 70px;
+    padding: 24px;
+    margin: 0;
+}
+
+.navigation__link {
+    text-decoration: none;
+    color: white;
+    margin-right: 20px; /* Espaçamento entre os links, ajuste conforme necessário */
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+
+.header-content img {
+    width: 400px; /* Define a largura da imagem */
+    height: auto; /* Mantém a proporção de aspecto original */
+}

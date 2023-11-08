@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="/css/editarBrinquedo.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-masker/1.2.0/vanilla-masker.min.js"></script>
+</head>
+
+<body>
+    <div id="background">
+        <video loop autoplay muted>
+            <source src="/assets/background-video.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <img src="/assets/logo.ico" alt="">
+            <ul class="navigation">
+                <li>
+                    <a href="/" class="navigation__link">Home</a>
+                </li>
+                <li>
+                    <a href="/catalogo" class="navigation__link">Catálogo de Brinquedos</a>
+                </li>
+                <li>
+                    <a href="/administracao" class="navigation__link">Administração</a>
+                </li>
+                <li>
+                    <a href="#" class="navigation__link">Sobre a equipe</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <body>
+        <div class="container">
+            <h1 class="titulo">Editar Brinquedo</h1>
+            <table>
+                <tr>
+                    <td>CÓDIGO:</td>
+                    <td><input disabled type="text" name="codigo"></td>
+
+                </tr>
+                <tr>
+                    <td>DESCRIÇÃO:</td>
+                    <td><input type="text" name="descricao" style="width: 800px"></td>
+                </tr>
+                <tr>
+                    <td>CATEGORIA:</td>
+                    <td><input type="text" name="categoria" style="width: 800px"></td>
+                </tr>
+                <tr>
+                    <td>MARCA:</td>
+                    <td><input type="text" name="marca" style="width: 800px"></td>
+                </tr>
+                <tr>
+                    <td>IMAGEM:</td>
+                    <td>
+                        <input type="file" name="imagem" accept="image/*">
+                    </td>
+                    <td>
+                        <img height="100px" id="img" src="" alt="">
+                    </td>
+                </tr>
+                <tr>
+                    <td>VALOR:</td>
+                    <td><input type="text" name="valor"></td>
+                </tr>
+                <tr>
+                    <td>DETALHES:</td>
+                    <td><textarea name="detalhes" style="width: 800px"></textarea></td>
+                </tr>
+            </table>
+            <button type="submit" id="salvarDados" class="savebtn">SALVAR EDIÇÃO</button>
+        </div>
+        <script>
+            VMasker(document.querySelector('input[name="valor"]')).maskMoney({
+                // Decimal precision -> "90"
+                precision: 2,
+                // Decimal separator -> ",90"
+                separator: ',',
+                // Number delimiter -> "12.345.678"
+                delimiter: '.',
+                // Money unit -> "R$ 12.345.678,90"
+                // Force type only number instead decimal,
+                // masking decimals with ",00"
+                // Zero cents -> "R$ 1.234.567.890,00"
+               
+            });
+
+            const url = new URL(window.location.href)
+            const search = Object.fromEntries(url.searchParams.entries())
+            async function buscarBrinquedo() {
+                console.log(search)
+
+                await axios.get("http://localhost:8080/brinquedo/" + search.id)
+                    .then(res => {
+                        const brinquedo = res.data
+                        document.querySelector('input[name="codigo"]').value = brinquedo.id;
+                        document.querySelector('input[name="descricao"]').value = brinquedo.description;
+                        document.querySelector('input[name="categoria"]').value = brinquedo.category;
+                        document.querySelector('input[name="marca"]').value = brinquedo.brand;
+                        document.querySelector('input[name="imagem"]').files[0];
+                        document.querySelector('input[name="valor"]').value = brinquedo.value.toFixed(2);
+                        document.querySelector('textarea[name="detalhes"]').value = brinquedo.name;
+                        document.getElementById("img").src=brinquedo.url
+                        console.log(brinquedo); // Trate a resposta do servidor, se necessário
+                    })
+                    .catch(error => {
+                        console.error('Erro: ' + error);
+                    });
+            }
+            buscarBrinquedo()
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const salvarDadosButton = document.getElementById('salvarDados');
+
+                salvarDadosButton.addEventListener('click', async function () {
+                    const codigo = document.querySelector('input[name="codigo"]').value;
+                    const descricao = document.querySelector('input[name="descricao"]').value;
+                    const categoria = document.querySelector('input[name="categoria"]').value;
+                    const marca = document.querySelector('input[name="marca"]').value;
+                    const imagem = document.querySelector('input[name="imagem"]').files[0];
+                    const valor = document.querySelector('input[name="valor"]').value;
+                    const detalhes = document.querySelector('textarea[name="detalhes"]').value;
+
+                    const formData = new FormData();
+                    formData.append('codigo', codigo);
+                    formData.append('descricao', descricao);
+                    formData.append('categoria', categoria);
+                    formData.append('marca', marca);
+                    formData.append('imagem', imagem);
+                    formData.append('valor', valor);
+                    formData.append('detalhes', detalhes);
+
+                    await axios.put("http://localhost:8080/brinquedo/update/" + search.id, {
+                        brand: marca,
+                        category: categoria,
+                        description: descricao,
+                        details: detalhes,
+                        name: "tst",
+                        url: "",
+                        value: Number(VMasker.toNumber(valor)) / 100
+                    })
+                        .then(data => {
+                            console.log(data); // Trate a resposta do servidor, se necessário
+                        })
+                        .catch(error => {
+                            console.error('Erro: ' + error);
+                        });
+                });
+
+            }); </script>
+    </body>
